@@ -36,7 +36,7 @@
 /* Стили для фоновых элементов */
 .background-element {
   position: absolute;
-  z-index: 0; /* Ниже птицы и труб */
+  z-index: 0.5; /* Выше гор (z-index: 0), но ниже труб (z-index: 1) */
   pointer-events: none; /* Не реагируют на события мыши/тача */
 }
 
