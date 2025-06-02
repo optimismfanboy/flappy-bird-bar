@@ -43,6 +43,8 @@ const FlappyGame = ({ onGameOver, onRestart }) => {
   const pipeTimerRef = useRef();
   const lastFrameTimeRef = useRef(0);
   const [pipeSpeed, setPipeSpeed] = useState(BASE_PIPE_SPEED);
+  const lastJumpTimeRef = useRef(0); // Добавляем реф для отслеживания времени последнего прыжка
+  const touchStartYRef = useRef(0); // Добавляем реф для отслеживания начальной позиции тача
 
   // Загрузка рекорда из localStorage при монтировании компонента
   useEffect(() => {
@@ -78,6 +80,13 @@ const FlappyGame = ({ onGameOver, onRestart }) => {
 
   // Обработчик клика для прыжка птицы
   const handleJump = () => {
+    const now = Date.now();
+    // Проверяем, прошло ли достаточно времени с последнего прыжка (300мс)
+    if (now - lastJumpTimeRef.current < 300) {
+      return;
+    }
+    lastJumpTimeRef.current = now;
+
     if (gameState === 'playing') {
       setBirdVelocityY(JUMP_STRENGTH);
       setBirdRotation(-20); 
@@ -208,19 +217,36 @@ const FlappyGame = ({ onGameOver, onRestart }) => {
   // Добавляем обработчики клика/тапа на контейнер игры
   useEffect(() => {
     const gameArea = gameAreaRef.current;
-    if (gameArea) {
-      gameArea.addEventListener('click', handleJump);
-      gameArea.addEventListener('touchstart', handleJump);
-    }
+    if (!gameArea) return;
 
-    return () => {
-      if (gameArea) {
-        gameArea.removeEventListener('click', handleJump);
-        gameArea.removeEventListener('touchstart', handleJump);
+    const handleTouchStart = (e) => {
+      e.preventDefault(); // Предотвращаем стандартное поведение
+      touchStartYRef.current = e.touches[0].clientY;
+    };
+
+    const handleTouchEnd = (e) => {
+      e.preventDefault(); // Предотвращаем стандартное поведение
+      const touchEndY = e.changedTouches[0].clientY;
+      const touchDiff = Math.abs(touchEndY - touchStartYRef.current);
+      
+      // Проверяем, что это был короткий тап (не свайп)
+      if (touchDiff < 10) {
+        handleJump();
       }
     };
-  }, [handleJump]);
 
+    // Добавляем обработчики
+    gameArea.addEventListener('click', handleJump);
+    gameArea.addEventListener('touchstart', handleTouchStart, { passive: false });
+    gameArea.addEventListener('touchend', handleTouchEnd, { passive: false });
+
+    return () => {
+      // Удаляем обработчики
+      gameArea.removeEventListener('click', handleJump);
+      gameArea.removeEventListener('touchstart', handleTouchStart);
+      gameArea.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [gameState]); // Зависимость только от gameState
 
   return (
     <div className="flappy-game-container" ref={gameAreaRef}>
