@@ -16,6 +16,7 @@ function App() {
 
   return (
     <div className="app-container">
+      
       <FlappyStart onClick={handleButtonClick} />
       <FlappyModal isVisible={isModalVisible} onClose={handleCloseModal} />
     </div>

@@ -189,24 +189,27 @@ const FlappyGame = ({ onGameOver, onRestart }) => {
   // Обработчик клика для прыжка птицы
   const handleJump = () => {
     const now = Date.now();
-    // Проверяем, прошло ли достаточно времени с последнего прыжка (300мс)
+    // Проверяем, прошло ли достаточно времени с последнего прыжка (50мс)
     if (now - lastJumpTimeRef.current < 50) {
       return;
     }
     lastJumpTimeRef.current = now;
 
     if (gameState === 'playing') {
+      // Логика прыжка только в состоянии игры
       setBirdVelocityY(JUMP_STRENGTH);
       setBirdRotation(-20); 
     } else if (gameState === 'idle') {
-      console.log('Starting game...'); // Отладочная информация
+      // Логика старта игры при первом клике/тапе
+      console.log('Starting game...');
       setGameState('playing');
-      setScore(0);
-      setPipes([]);
-      setBirdPositionY(GAME_HEIGHT / 2 + 20);
-      setBirdVelocityY(0);
-      setBirdRotation(0);
+      setScore(0); // Сбрасываем счет при старте
+      setPipes([]); // Сбрасываем трубы при старте
+      setBirdPositionY(GAME_HEIGHT / 2 + 20); // Сбрасываем позицию птицы
+      setBirdVelocityY(JUMP_STRENGTH); // Сразу даем первый прыжок
+      setBirdRotation(-20);
       lastFrameTimeRef.current = 0; // Сбрасываем время последнего кадра
+      setBackgroundElements([]); // Сбрасываем фоновые элементы при старте
     }
   };
 
@@ -503,13 +506,13 @@ const FlappyGame = ({ onGameOver, onRestart }) => {
             className="restart-button"
             onClick={() => { // Добавляем обертку для лога
               console.log('Restart button clicked in FlappyGame');
-              onRestart();
+              resetGame();
             }} 
             onTouchEnd={(e) => {
               e.preventDefault();
               e.stopPropagation();
               console.log('Restart button touched in FlappyGame');
-              onRestart();
+              resetGame();
             }}
           >
             Начать заново

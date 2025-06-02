@@ -6,13 +6,14 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
-import FlappyStart from './FlappyStart';
+// import FlappyStart from './FlappyStart'; // Удаляем импорт FlappyStart
 import FlappyGame from './FlappyGame';
 import './FlappyModal.css';
 
 const FlappyModal = ({ isVisible, onClose }) => {
   const modalOverlayRef = useRef(null);
-  const [gameStatus, setGameStatus] = useState('idle');
+  // Удаляем состояние gameStatus
+  // const [gameStatus, setGameStatus] = useState('idle');
   const [allowOverlayClose, setAllowOverlayClose] = useState(false);
 
   useEffect(() => {
@@ -24,14 +25,16 @@ const FlappyModal = ({ isVisible, onClose }) => {
       const timeoutId = setTimeout(() => {
         setAllowOverlayClose(true);
       }, 350);
-      setGameStatus('idle');
+      // Удаляем установку gameStatus при открытии
+      // setGameStatus('playing');
       return () => clearTimeout(timeoutId);
     } else {
       overlay.classList.remove('visible');
       setAllowOverlayClose(false);
       const handleTransitionEnd = () => {
         overlay.removeEventListener('transitionend', handleTransitionEnd);
-        setGameStatus('idle');
+        // Удаляем сброс gameStatus при закрытии
+        // setGameStatus('idle');
       };
       overlay.addEventListener('transitionend', handleTransitionEnd);
     }
@@ -47,32 +50,28 @@ const FlappyModal = ({ isVisible, onClose }) => {
     e.stopPropagation();
   };
 
-  const handleGameStart = () => {
-    setGameStatus('playing');
-  };
+  // Удаляем функции управления игрой, они будут в FlappyGame
+  // const handleGameOver = () => {
+  //   setGameStatus('gameOver');
+  // };
 
-  const handleGameOver = () => {
-    setGameStatus('gameOver');
-  };
-
-  const handleGameRestart = () => {
-    console.log('handleGameRestart called in FlappyModal');
-    setTimeout(() => {
-      console.log('Setting gameStatus to idle...');
-      setGameStatus('idle');
-    }, 50);
-  };
+  // const handleGameRestart = () => {
+  //   console.log('handleGameRestart called in FlappyModal');
+  //   setTimeout(() => {
+  //     console.log('Setting gameStatus to idle...');
+  //     setGameStatus('idle');
+  //   }, 50);
+  // };
 
   return (
     <div className="modal-overlay" ref={modalOverlayRef} onClick={handleOverlayClick}> 
       <div className="modal-content" onClick={handleContentClick}>
-        {gameStatus === 'idle' && (
-          <FlappyStart onClick={handleGameStart} />
-        )}
-        {(gameStatus === 'playing' || gameStatus === 'gameOver') && (
+        {/* Рендерим игру безусловно, когда модальное окно видимо */}
+        {isVisible && (
           <FlappyGame
-            onGameOver={handleGameOver}
-            onRestart={handleGameRestart}
+            // Удаляем пропсы onGameOver и onRestart, игра управляет состоянием сама
+            // onGameOver={handleGameOver}
+            // onRestart={handleGameRestart}
           />
         )}
       </div>
