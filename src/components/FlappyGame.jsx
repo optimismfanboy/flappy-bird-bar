@@ -82,7 +82,7 @@ const FlappyGame = ({ onGameOver, onRestart }) => {
   const handleJump = () => {
     const now = Date.now();
     // Проверяем, прошло ли достаточно времени с последнего прыжка (300мс)
-    if (now - lastJumpTimeRef.current < 300) {
+    if (now - lastJumpTimeRef.current < 100) {
       return;
     }
     lastJumpTimeRef.current = now;
