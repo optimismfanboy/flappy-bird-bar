@@ -11,16 +11,16 @@ import './FlappyGame.css';
 // Константы игры
 const GAME_WIDTH = 390; // Ширина игрового поля
 const GAME_HEIGHT = 400; // Высота игрового поля
-const GRAVITY = 0.1; // Сила гравитации
-const JUMP_STRENGTH = -3; // Сила прыжка (отрицательное значение для движения вверх)
+const GRAVITY = 0.3; // Сила гравитации
+const JUMP_STRENGTH = -5; // Сила прыжка (отрицательное значение для движения вверх)
 const BIRD_SIZE = 20; // Размер птицы
 const BIRD_POSITION_X = 70; // Фиксированная позиция птицы по горизонтали
 
 // Константы для труб
 const PIPE_WIDTH = 50;
 const PIPE_GAP = 100; // Расстояние между верхней и нижней трубой
-const PIPE_SPEED = 1; // Скорость движения труб
-const PIPE_DISTANCE = 1200; // Расстояние между парами труб
+const BASE_PIPE_SPEED = 2; // Базовая скорость движения труб
+const PIPE_DISTANCE = 1200; // Расстояние между парами труб (уменьшено для мобильных устройств)
 
 const FlappyGame = ({ onGameOver, onRestart }) => {
   const gameAreaRef = useRef(null);
@@ -41,6 +41,8 @@ const FlappyGame = ({ onGameOver, onRestart }) => {
   // Реф для игрового цикла и таймера генерации труб
   const gameLoopRef = useRef();
   const pipeTimerRef = useRef();
+  const lastFrameTimeRef = useRef(0);
+  const [pipeSpeed, setPipeSpeed] = useState(BASE_PIPE_SPEED);
 
   // Загрузка рекорда из localStorage при монтировании компонента
   useEffect(() => {
@@ -49,22 +51,6 @@ const FlappyGame = ({ onGameOver, onRestart }) => {
       setHighScore(parseInt(savedHighScore, 10));
     }
   }, []); // Пустой массив зависимостей означает, что эффект выполнится только один раз при монтировании
-
-  // Обработчик клика для прыжка птицы
-  const handleJump = () => {
-    if (gameState === 'playing') {
-      setBirdVelocityY(JUMP_STRENGTH);
-       // Optionally set initial rotation on jump for snappier feel
-      setBirdRotation(-20); 
-    } else if (gameState === 'idle') {
-      setGameState('playing');
-      setScore(0);
-      setPipes([]); // Сбрасываем трубы при старте новой игры
-      setBirdPositionY(GAME_HEIGHT / 2);
-      setBirdVelocityY(0);
-      setBirdRotation(0); // Reset rotation on new game
-    }
-  };
 
   // Логика генерации труб
   useEffect(() => {
@@ -85,18 +71,36 @@ const FlappyGame = ({ onGameOver, onRestart }) => {
     };
 
     generatePipe();
-    pipeTimerRef.current = setInterval(generatePipe, PIPE_DISTANCE * PIPE_SPEED);
+    pipeTimerRef.current = setInterval(generatePipe, PIPE_DISTANCE);
 
     return () => clearInterval(pipeTimerRef.current);
   }, [gameState]);
 
+  // Обработчик клика для прыжка птицы
+  const handleJump = () => {
+    if (gameState === 'playing') {
+      setBirdVelocityY(JUMP_STRENGTH);
+      setBirdRotation(-20); 
+    } else if (gameState === 'idle') {
+      console.log('Starting game...'); // Отладочная информация
+      setGameState('playing');
+      setScore(0);
+      setPipes([]);
+      setBirdPositionY(GAME_HEIGHT / 2);
+      setBirdVelocityY(0);
+      setBirdRotation(0);
+      lastFrameTimeRef.current = 0; // Сбрасываем время последнего кадра
+    }
+  };
 
   // Игровой цикл (движение птицы, труб, столкновения, очки)
   useEffect(() => {
+    console.log('Game state changed:', gameState); // Отладочная информация
+    
     if (gameState !== 'playing') {
       cancelAnimationFrame(gameLoopRef.current);
+      lastFrameTimeRef.current = 0;
 
-      // Сохранение рекорда при окончании игры
       if (gameState === 'gameOver' && Math.floor(score / 2) > highScore) {
         const finalScore = Math.floor(score / 2);
         setHighScore(finalScore);
@@ -106,26 +110,36 @@ const FlappyGame = ({ onGameOver, onRestart }) => {
       return;
     }
 
-    const gameLoop = () => {
+    const gameLoop = (timestamp) => {
+      if (!lastFrameTimeRef.current) {
+        lastFrameTimeRef.current = timestamp;
+      }
+
+      const deltaTime = timestamp - lastFrameTimeRef.current;
+      lastFrameTimeRef.current = timestamp;
+
+      // Адаптируем скорость под частоту обновления экрана
+      const speedMultiplier = Math.min(deltaTime / 16.67, 2); // 16.67ms = ~60fps
+      const currentPipeSpeed = BASE_PIPE_SPEED * speedMultiplier;
+      setPipeSpeed(currentPipeSpeed);
+
       // Движение птицы
       setBirdPositionY(prev => {
-        const newPosition = prev + birdVelocityY;
-        // Проверка столкновения с верхней или нижней границей игрового поля
+        const newPosition = prev + birdVelocityY * speedMultiplier;
         if (newPosition <= 0 || newPosition >= GAME_HEIGHT - BIRD_SIZE) {
           setGameState('gameOver');
-          return newPosition; // Позволяем птице упасть до края для наглядности
+          return newPosition;
         }
         return newPosition;
       });
 
       setBirdVelocityY(prev => {
-        const newVelocity = prev + GRAVITY;
-        // Calculate rotation based on new velocity
+        const newVelocity = prev + GRAVITY * speedMultiplier;
         let rotation = 0;
-        if (newVelocity < 0) { // Moving up
-          rotation = Math.max(-20, newVelocity * 7); // Adjust multiplier as needed
-        } else { // Moving down or still
-          rotation = Math.min(45, newVelocity * 9); // Adjust multiplier as needed
+        if (newVelocity < 0) {
+          rotation = Math.max(-20, newVelocity * 7);
+        } else {
+          rotation = Math.min(45, newVelocity * 9);
         }
         setBirdRotation(rotation);
         return newVelocity;
@@ -135,7 +149,7 @@ const FlappyGame = ({ onGameOver, onRestart }) => {
       setPipes(prevPipes =>
         prevPipes
           .map(pipe => {
-            const newLeft = pipe.left - PIPE_SPEED;
+            const newLeft = pipe.left - currentPipeSpeed;
 
             // Проверка столкновения с текущей трубой (AABB collision)
             const birdLeft = BIRD_POSITION_X;

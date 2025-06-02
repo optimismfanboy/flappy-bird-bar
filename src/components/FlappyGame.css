@@ -6,17 +6,15 @@
  */
 
 .flappy-game-container {
-  position: relative; /* Меняем на relative для центрирования внутри flex контейнера */
-  width: 390px; /* Заданная ширина */
-  height: 400px; /* Заданная высота */
-  background-color: skyblue; /* Временный фон */
+  position: relative;
+  width: 390px;
+  height: 400px;
+  background-color: skyblue;
   overflow: hidden;
   cursor: pointer;
-  /* Убираем flexbox свойства отсюда, так как контейнер игры будет центрироваться родительским modal-content */
-  /* display: flex; */
-  /* justify-content: center; */
-  /* align-items: center; */
-  /* flex-direction: column; */
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .bird {
@@ -26,17 +24,18 @@
   z-index: 5; /* Птица поверх труб */
   /* Стили для предотвращения выделения и перетаскивания */
   user-select: none;
-  -webkit-user-select: none; /* Safari */
-  -ms-user-select: none; /* IE 10+ */
-  -moz-user-select: none; /* Firefox */
-  -webkit-touch-callout: none; /* iOS Safari */
-  -webkit-user-drag: none; /* Safari */
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  -moz-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
 }
 
 .pipe {
   position: absolute;
-  background-color: green; /* Временный цвет труб */
-  z-index: 1; /* Трубы под птицей */
+  background-color: green;
+  z-index: 1;
+  width: 50px;
 }
 
 .pipe-top {
@@ -44,35 +43,39 @@
 }
 
 .pipe-bottom {
-  /* Позиция по top вычисляется динамически в JSX */
+  bottom: 0;
 }
 
 .game-message,
 .score,
 .game-over-screen {
-  position: absolute; /* Делаем абсолютное позиционирование внутри игрового контейнера */
-  width: 100%; /* Расширяем на всю ширину контейнера игры */
-  text-align: center; /* Центрируем текст */
+  position: absolute;
+  width: 100%;
+  text-align: center;
   z-index: 10;
   color: white;
   font-size: 24px;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-  top: 50%; /* Центрируем по вертикали внутри игрового контейнера */
-  transform: translateY(-50%); /* Сдвигаем обратно на половину высоты */
+  pointer-events: none;
+}
+
+.game-message {
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .score {
-  top: 10px; /* Размещаем счетчик сверху */
-  transform: none; /* Отключаем сдвиг для счетчика */
-  text-align: center; /* Центрируем текст */
+  top: 10px;
+  transform: none;
 }
 
 .game-over-screen {
-    top: 50%; /* Центрируем экран поражения по вертикали */
-    transform: translateY(-50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: auto;
 }
 
 .game-over-screen button {
@@ -80,4 +83,9 @@
   padding: 10px 20px;
   font-size: 18px;
   cursor: pointer;
+  background: var(--tg-theme-button-color, #007AFF);
+  color: var(--tg-theme-button-text-color, white);
+  border: none;
+  border-radius: 8px;
+  pointer-events: auto;
 } 
