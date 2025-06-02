@@ -9,7 +9,7 @@
   position: relative;
   width: 370px; /* Уменьшаем ширину на 20px (10px с каждой стороны) */
   height: 400px;
-  background-color: skyblue;
+  background-color: #f5c798;
   overflow: hidden;
   cursor: pointer;
   display: flex;
@@ -18,12 +18,9 @@
   margin: 0 10px; /* Добавляем отступы слева и справа */
 }
 
-.bird {
+.bird-image {
   position: absolute;
-  background-color: yellow; /* Временный цвет птицы */
-  border-radius: 50%; /* Делаем круглую птицу */
-  z-index: 5; /* Птица поверх труб */
-  /* Стили для предотвращения выделения и перетаскивания */
+  z-index: 5;
   user-select: none;
   -webkit-user-select: none;
   -ms-user-select: none;
@@ -34,7 +31,7 @@
 
 .pipe {
   position: absolute;
-  background-color: green;
+  background-color: #410C00;
   z-index: 1;
   width: 50px;
 }
