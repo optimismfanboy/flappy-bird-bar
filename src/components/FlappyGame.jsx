@@ -82,7 +82,7 @@ const FlappyGame = ({ onGameOver, onRestart }) => {
   const handleJump = () => {
     const now = Date.now();
     // Проверяем, прошло ли достаточно времени с последнего прыжка (300мс)
-    if (now - lastJumpTimeRef.current < 100) {
+    if (now - lastJumpTimeRef.current < 50) {
       return;
     }
     lastJumpTimeRef.current = now;
@@ -310,8 +310,17 @@ const FlappyGame = ({ onGameOver, onRestart }) => {
         <div className="game-over-screen">
           <div className="high-score">Ваш рекорд: {highScore}</div>
           <div className="final-score">Пройдено труб: {Math.floor(score / 2)}</div>
-          <button onClick={onRestart}>Начать заново</button>
-          <button onClick={onGameOver}>Выйти</button>
+          <button 
+            className="restart-button"
+            onClick={onRestart}
+            onTouchEnd={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onRestart();
+            }}
+          >
+            Начать заново
+          </button>
         </div>
       )}
     </div>
