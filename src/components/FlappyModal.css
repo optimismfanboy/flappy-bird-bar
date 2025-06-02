@@ -7,7 +7,7 @@
   background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-end;
   z-index: 1000;
   opacity: 0;
   transition: opacity 300ms ease-out, visibility 300ms ease-out;
@@ -24,9 +24,11 @@
 .modal-content {
   position: relative;
   width: 90%;
-  max-width: 390px;
+  min-width: 390px;
   height: 90%;
-  max-height: 630px;
+  min-height: 430px;
+  max-width: none;
+  max-height: none;
   background-color: white;
   border-top-left-radius: 10px;
   border-top-right-radius: 10px;

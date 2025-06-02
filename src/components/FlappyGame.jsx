@@ -354,9 +354,12 @@ const FlappyGame = ({ onGameOver, onRestart }) => {
     if (!gameArea) return;
 
     const handleTouchStart = (e) => {
-      if (gameState === 'playing') { // Только во время игры
-        e.preventDefault();
-        e.stopPropagation();
+      // Предотвращаем стандартное поведение браузера (например, зум) всегда внутри контейнера игры
+      e.preventDefault();
+      e.stopPropagation();
+
+      // Логика для определения тапа (оставляем только для состояния playing)
+      if (gameState === 'playing') {
         touchStartYRef.current = e.touches[0].clientY;
       }
     };
