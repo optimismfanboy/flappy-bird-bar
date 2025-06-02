@@ -9,13 +9,16 @@
   position: relative;
   width: 370px; /* Уменьшаем ширину на 20px (10px с каждой стороны) */
   height: 400px;
-  background-color: #f5c798;
+  background-color: #28c0e6;
   overflow: hidden;
   cursor: pointer;
   display: flex;
   justify-content: center;
   align-items: center;
   margin: 0 10px; /* Добавляем отступы слева и справа */
+  user-select: none;
+  -webkit-user-select: none;
+  font-family: 'Tiffany', sans-serif; /* Применяем шрифт Tiffany */
 }
 
 .bird-image {
@@ -27,21 +30,30 @@
   -moz-user-select: none;
   -webkit-touch-callout: none;
   -webkit-user-drag: none;
+  pointer-events: none; /* События мыши/тача проваливаются */
 }
 
-.pipe {
+/* Стили для фоновых элементов */
+.background-element {
   position: absolute;
-  background-color: #410C00;
+  z-index: 0; /* Ниже птицы и труб */
+  pointer-events: none; /* Не реагируют на события мыши/тача */
+}
+
+/* Стили для изображений труб */
+.pipe-image {
+  position: absolute;
   z-index: 1;
-  width: 50px;
+  /* object-fit: fill; Убеждаемся, что изображение заполняет размеры */
+  pointer-events: none; /* События мыши/тача проваливаются */
 }
 
 .pipe-top {
-  top: 0;
+  /* Дополнительные стили для верхней трубы, если нужны */
 }
 
 .pipe-bottom {
-  bottom: 0;
+  /* Дополнительные стили для нижней трубы, если нужны */
 }
 
 .game-message,

@@ -56,7 +56,11 @@ const FlappyModal = ({ isVisible, onClose }) => {
   };
 
   const handleGameRestart = () => {
-    setGameStatus('idle');
+    console.log('handleGameRestart called in FlappyModal');
+    setTimeout(() => {
+      console.log('Setting gameStatus to idle...');
+      setGameStatus('idle');
+    }, 50);
   };
 
   return (
