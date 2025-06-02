@@ -61,7 +61,6 @@ const FlappyGame = ({ onGameOver, onRestart }) => {
   const lastFrameTimeRef = useRef(0);
   const [pipeSpeed, setPipeSpeed] = useState(BASE_PIPE_SPEED);
   const lastJumpTimeRef = useRef(0); // Добавляем реф для отслеживания времени последнего прыжка
-  const touchStartYRef = useRef(0); // Добавляем реф для отслеживания начальной позиции тача
 
   // Состояние для фоновых элементов (облаков)
   const [backgroundElements, setBackgroundElements] = useState([]);
@@ -356,48 +355,37 @@ const FlappyGame = ({ onGameOver, onRestart }) => {
     const gameArea = gameAreaRef.current;
     if (!gameArea) return;
 
-    const handleTouchStart = (e) => {
-      // Предотвращаем стандартное поведение браузера (например, зум) всегда внутри контейнера игры
+    // Удаляем старые обработчики touchstart и touchend
+    // const handleTouchStart = (e) => { ... };
+    // const handleTouchEnd = (e) => { ... };
+
+    // Новый обработчик для начала касания или клика мыши
+    const handlePointerDown = (e) => {
+      console.log('PointerDown on game container. Current gameState:', gameState); // Лог в handlePointerDown
+      // Предотвращаем стандартное поведение браузера (например, зум или скролл)
       e.preventDefault();
       e.stopPropagation();
 
-      // Логика для определения тапа (оставляем только для состояния playing)
-      if (gameState === 'playing') {
-        touchStartYRef.current = e.touches[0].clientY;
-      }
-    };
-
-    const handleTouchEnd = (e) => {
-      if (gameState === 'playing') { // Только во время игры
-        e.preventDefault();
-        e.stopPropagation();
-        const touchEndY = e.changedTouches[0].clientY;
-        const touchDiff = Math.abs(touchEndY - touchStartYRef.current);
-        
-        if (touchDiff < 10) {
-          handleJump();
-        }
-      }
-    };
-    
-    const handleClick = (e) => {
-      if (gameState === 'playing' || gameState === 'idle') { // Во время игры или простоя (для старта)
-        e.preventDefault();
-        e.stopPropagation();
+      // Вызываем handleJump при начале касания или клика, если игра в состоянии idle или playing
+      if (gameState === 'playing' || gameState === 'idle') {
         handleJump();
       }
     };
+    
+    // Удаляем существующий обработчик клика
+    // const handleClick = (e) => { ... };
 
-    // Добавляем обработчики
-    gameArea.addEventListener('click', handleClick);
-    gameArea.addEventListener('touchstart', handleTouchStart, { passive: false });
-    gameArea.addEventListener('touchend', handleTouchEnd, { passive: false });
+    // Добавляем новый обработчик
+    // Привязываем handlePointerDown вместо touchstart и touchend
+    gameArea.addEventListener('pointerdown', handlePointerDown, { passive: false });
+    // Удаляем привязку click
+    // gameArea.addEventListener('click', handleClick);
 
     return () => {
       // Удаляем обработчики
-      gameArea.removeEventListener('click', handleClick);
-      gameArea.removeEventListener('touchstart', handleTouchStart);
-      gameArea.removeEventListener('touchend', handleTouchEnd);
+      gameArea.removeEventListener('pointerdown', handlePointerDown);
+      // Удаляем удаление привязки click
+      // gameArea.removeEventListener('click', handleClick);
     };
   }, [gameState, handleJump]); // Зависимость от gameState и handleJump
 

@@ -11,7 +11,7 @@ import './FlappyStart.css';
 const FlappyStart = ({ onClick }) => {
   return (
     <button className="flappy-start" onClick={onClick}>
-      3 попытки
+      Начать игру
     </button>
   );
 };
