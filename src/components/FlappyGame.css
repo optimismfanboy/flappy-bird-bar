@@ -19,6 +19,7 @@
   user-select: none;
   -webkit-user-select: none;
   font-family: 'Tiffany', sans-serif; /* Применяем шрифт Tiffany */
+  letter-spacing: 3px; /* Добавляем расстояние между буквами */
 }
 
 .bird-image {
@@ -36,14 +37,14 @@
 /* Стили для фоновых элементов */
 .background-element {
   position: absolute;
-  z-index: 0.5; /* Выше гор (z-index: 0), но ниже труб (z-index: 1) */
+  z-index: 1; /* Выше гор (z-index: 0) */
   pointer-events: none; /* Не реагируют на события мыши/тача */
 }
 
 /* Стили для изображений труб */
 .pipe-image {
   position: absolute;
-  z-index: 1;
+  z-index: 2; /* Выше облаков (z-index: 1) */
   /* object-fit: fill; Убеждаемся, что изображение заполняет размеры */
   pointer-events: none; /* События мыши/тача проваливаются */
 }
@@ -101,23 +102,42 @@
 
 .restart-button {
   margin-top: 20px;
-  padding: 15px 30px;
-  font-size: 18px;
   cursor: pointer;
-  background: var(--tg-theme-button-color, #007AFF);
-  color: var(--tg-theme-button-text-color, white);
-  border: none;
-  border-radius: 8px;
   pointer-events: auto;
-  width: 100%;
-  max-width: 200px;
+  width: 216px;
+  height: 46px;
+  max-width: 216px;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
   -webkit-user-select: none;
-  transition: transform 0.1s ease;
+  background: #FFFBF7;
+  border-radius: 5px;
+  border: 1px solid #410C00;
+  color: #410C00;
+  font-family: 'Tiffany', sans-serif;
+  font-style: normal;
+  font-weight: 300;
+  font-size: 28px;
+  line-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s ease, transform 0.1s ease;
+}
+
+.restart-button:hover {
+  opacity: 0.9;
 }
 
 .restart-button:active {
+  opacity: 0.8;
   transform: scale(0.98);
+}
+
+/* Стили для блока информации под игрой */
+.game-over-screen .high-score,
+.game-over-screen .final-score {
+  margin-bottom: 15px;
+  font-size: 20px;
 } 

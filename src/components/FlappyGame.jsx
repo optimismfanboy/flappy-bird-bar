@@ -31,7 +31,7 @@ const BACKGROUND_SPEED = 1; // Скорость движения фоновых 
 const MAX_BACKGROUND_ELEMENTS = 3; // Максимальное количество фоновых элементов (облаков) на экране
 const MIN_BACKGROUND_DISTANCE = 50; // Минимальное расстояние между фоновыми элементами (облаками) по вертикали
 const MAX_GENERATION_ATTEMPTS = 10; // Максимальное количество попыток генерации элемента (облаков)
-const BACKGROUND_IMAGES = ['/cloud1.jpg', '/cloud2.jpg', '/cloud4.jpg', '/seno.jpg']; // Массив путей к фоновым изображениям (облаков)
+const BACKGROUND_IMAGES = ['/cloud1.jpg', '/cloud2.jpg', '/cloud4.jpg']; // Массив путей к фоновым изображениям (облаков)
 
 // Константы для движущегося задника (гор)
 const MOUNTAIN_BACKGROUND_SPEED = 1.5; // Скорость движения задника (гор)
@@ -139,7 +139,11 @@ const FlappyGame = ({ onGameOver, onRestart }) => {
 
           // Пытаемся найти подходящую случайную позицию по вертикали
           while (attempts < MAX_GENERATION_ATTEMPTS && !foundValidPosition) {
-            const randomTop = Math.random() * (GAME_HEIGHT - size);
+            // Генерируем случайную позицию только выше области гор
+            const minTop = 0; // Верхняя граница игрового поля
+            const maxTop = GAME_HEIGHT - MOUNTAIN_BACKGROUND_HEIGHT - size; // Нижняя граница для облаков (над горами)
+            const randomTop = Math.random() * (maxTop - minTop) + minTop; // Случайная позиция в новом диапазоне
+            
             // Случайно выбираем изображение из массива
             const randomImageSrc = BACKGROUND_IMAGES[Math.floor(Math.random() * BACKGROUND_IMAGES.length)];
             
@@ -442,7 +446,7 @@ const FlappyGame = ({ onGameOver, onRestart }) => {
             left: `${mountain.left}px`, // Позиция по горизонтали
             height: `${MOUNTAIN_BACKGROUND_HEIGHT}px`, // Заданная высота
             width: `${INITIAL_MOUNTAIN_WIDTH}px`, // Заданная ширина
-            zIndex: 0, // Низкий z-index, чтобы не перекрывать птицу и трубы
+            zIndex: 0, // Явно устанавливаем z-index для гор
             pointerEvents: 'none', // Игнорировать события мыши/тача
           }}
         />
