@@ -74,16 +74,20 @@ const FlappyGame = ({ onGameOver, onRestart }) => {
   // Реф для таймера генерации фоновых элементов
   const backgroundTimerRef = useRef();
 
+  // Добавляем ref для отслеживания пройденных труб
+  const passedPipesRef = useRef(new Set());
+
   // Функция для сброса состояния игры
   const resetGame = () => {
     setScore(0);
     setPipes([]);
+    passedPipesRef.current.clear(); // Очищаем множество пройденных труб
     setBirdPositionY(GAME_HEIGHT / 2 + 20);
     setBirdVelocityY(0);
     setBirdRotation(0);
     lastFrameTimeRef.current = 0;
-    setBackgroundElements([]); // Сбрасываем фоновые элементы при рестарте
-    setGameState('idle'); // Возвращаемся в состояние ожидания старта
+    setBackgroundElements([]);
+    setGameState('idle');
   };
 
   // Загрузка рекорда из localStorage при монтировании компонента
@@ -224,10 +228,9 @@ const FlappyGame = ({ onGameOver, onRestart }) => {
       cancelAnimationFrame(gameLoopRef.current);
       lastFrameTimeRef.current = 0;
 
-      if (gameState === 'gameOver' && Math.floor(score / 2) > highScore) {
-        const finalScore = Math.floor(score / 2);
-        setHighScore(finalScore);
-        localStorage.setItem('flappyHighScore', finalScore.toString());
+      if (gameState === 'gameOver' && score > highScore) {
+        setHighScore(score);
+        localStorage.setItem('flappyHighScore', score.toString());
       }
 
       return;
@@ -273,6 +276,7 @@ const FlappyGame = ({ onGameOver, onRestart }) => {
         prevPipes
           .map(pipe => {
             const newLeft = pipe.left - currentPipeSpeed;
+            const pipeId = `${pipe.left}-${pipe.height}`; // Уникальный идентификатор трубы
 
             // Проверка столкновения с текущей трубой (AABB collision)
             const birdLeft = BIRD_POSITION_X + BIRD_HITBOX_OFFSET_X;
@@ -285,17 +289,17 @@ const FlappyGame = ({ onGameOver, onRestart }) => {
 
             // Проверка столкновения с верхней трубой
             const topPipeBottom = pipe.height - PIPE_HITBOX_TRIM;
-            const hitTopPipe = !(birdRight < pipeLeft || // птица справа от трубы
-                                birdLeft > pipeRight || // птица слева от трубы
-                                birdBottom < 0 || // птица выше верхней границы верхней трубы (всегда 0)
-                                birdTop > topPipeBottom); // птица ниже нижней границы верхней трубы
+            const hitTopPipe = !(birdRight < pipeLeft || 
+                                birdLeft > pipeRight || 
+                                birdBottom < 0 || 
+                                birdTop > topPipeBottom);
 
             // Проверка столкновения с нижней трубой
-            const bottomPipeTop = pipe.height + PIPE_GAP + PIPE_HITBOX_TRIM; // Учитываем подрезку хитбокса снизу трубы
-            const hitBottomPipe = !(birdRight < pipeLeft || // птица справа от трубы
-                                 birdLeft > pipeRight || // птица слева от трубы
-                                 birdBottom < bottomPipeTop || // птица выше верхней границы нижней трубы
-                                 birdTop > GAME_HEIGHT); // птица ниже нижней границы нижней трубы (всегда GAME_HEIGHT)
+            const bottomPipeTop = pipe.height + PIPE_GAP + PIPE_HITBOX_TRIM;
+            const hitBottomPipe = !(birdRight < pipeLeft || 
+                                 birdLeft > pipeRight || 
+                                 birdBottom < bottomPipeTop || 
+                                 birdTop > GAME_HEIGHT);
 
             const hitPipe = hitTopPipe || hitBottomPipe;
 
@@ -304,19 +308,21 @@ const FlappyGame = ({ onGameOver, onRestart }) => {
             }
 
             // Проверка прохождения трубы для начисления очков
-            let scored = pipe.passed;
             const pipeRightEdge = pipe.left + PIPE_WIDTH;
             const newPipeRightEdge = newLeft + PIPE_WIDTH;
 
-            // Очко засчитывается, когда правый край трубы пересекает левый край птицы
-            if (!pipe.passed && pipeRightEdge >= BIRD_POSITION_X && newPipeRightEdge < BIRD_POSITION_X) {
+            // Очко засчитывается только если труба еще не была пройдена
+            if (!passedPipesRef.current.has(pipeId) && 
+                pipeRightEdge > BIRD_POSITION_X && 
+                newPipeRightEdge <= BIRD_POSITION_X) {
+              console.log('Начисление очка для трубы:', pipeId);
               setScore(prevScore => prevScore + 1);
-              scored = true;
+              passedPipesRef.current.add(pipeId);
             }
 
-            return { ...pipe, left: newLeft, passed: scored };
+            return { ...pipe, left: newLeft };
           })
-          .filter(pipe => pipe.left + PIPE_WIDTH > 0) // Удаляем трубы, вышедшие за левую границу
+          .filter(pipe => pipe.left + PIPE_WIDTH > 0)
       );
 
       // Движение фоновых элементов (облаков)
@@ -352,7 +358,7 @@ const FlappyGame = ({ onGameOver, onRestart }) => {
 
     return () => cancelAnimationFrame(gameLoopRef.current);
 
-  }, [gameState, birdVelocityY, pipes, score, highScore, backgroundElements, mountainBackgrounds]); // Добавляем backgroundElements и mountainBackgrounds в зависимости
+  }, [gameState, birdVelocityY, pipes, highScore, backgroundElements, mountainBackgrounds]); // Убираем score из зависимостей
 
   // Добавляем обработчики клика/тапа на контейнер игры
   useEffect(() => {
@@ -488,15 +494,15 @@ const FlappyGame = ({ onGameOver, onRestart }) => {
         <div className="game-message">Нажмите для старта</div>
       )}
       {gameState === 'playing' && (
-        <div className="score">Счет: {Math.floor(score / 2)}</div>
+        <div className="score">Счет: {score}</div>
       )}
       {gameState === 'gameOver' && (
         <div className="game-over-screen">
           <div className="high-score">Ваш рекорд: {highScore}</div>
-          <div className="final-score">Пройдено труб: {Math.floor(score / 2)}</div>
+          <div className="final-score">Пройдено труб: {score}</div>
           <button 
             className="restart-button"
-            onClick={() => { // Добавляем обертку для лога
+            onClick={() => {
               console.log('Restart button clicked in FlappyGame');
               resetGame();
             }} 
